@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace MarkovChain
@@ -45,16 +44,11 @@ namespace MarkovChain
                 this.states[valueTo] = stateTo = new ChainState<T>(valueTo);
             }
             ChainState<T> stateFrom;
-            if (this.states.TryGetValue(valueFrom, out stateFrom))
+            if (!this.states.TryGetValue(valueFrom, out stateFrom))
             {
-                stateFrom.AddTransition(stateTo);
+                this.states[valueFrom] = stateFrom = new ChainState<T>(valueFrom);
             }
-            else
-            {
-                stateFrom = new ChainState<T>(valueFrom);
-                stateFrom.AddTransition(stateTo, weight);
-                this.states[valueFrom] = stateFrom;
-            }
+            stateFrom.AddTransition(stateTo, weight);
         }
     }
 }
