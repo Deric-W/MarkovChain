@@ -82,6 +82,7 @@ namespace MarkovChain
                 if (sample <= transition.Value) {
                     return transition.Key;
                 }
+                sample -= transition.Value;
             }
             // the transitions where modified after generating the sum
             throw new InvalidSampleException($"sample '{sample + weightSum}' exeeds weight sum of '{weightSum}'");
