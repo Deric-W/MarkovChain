@@ -80,7 +80,7 @@ namespace MarkovChain.Tests
         }
 
         [Test]
-        public void PickNextState()
+        public void TryTransition()
         {
             ChainState<int> state = new ChainState<int>(
                 -1,
@@ -94,25 +94,30 @@ namespace MarkovChain.Tests
 
             Random rng = new Random(42);
 
-            int state0 = 0;
-            int state1 = 0;
+            int state0Count = 0;
+            int state1Count = 0;
+            ChainState<int> nextState;
 
             for (int i = 0; i < 100; i++)
             {
-                switch (state.PickNextState(rng).value)
+                Assert.True(state.TryTransition(rng, out nextState));
+                switch (nextState.value)
                 {
                     case 0:
-                        state0 += 1;
+                        state0Count += 1;
                         break;
                     case 1:
-                        state1 += 1;
+                        state1Count += 1;
                         break;
                     default:
                         Assert.Fail("picked invalid state");
                         break;
                 }
             }
-            Assert.Greater(state1, state0);
+            Assert.Greater(state1Count, state0Count);
+
+            Assert.False(new ChainState<int>(-1).TryTransition(rng, out nextState));
+            Assert.AreEqual(nextState, null);
         }
     }
 }

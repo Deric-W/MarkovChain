@@ -18,21 +18,4 @@ namespace MarkovChain
         {
         }
     }
-
-    public class MissingTransitionException : Exception
-    {
-        public MissingTransitionException()
-        {
-        }
-
-        public MissingTransitionException(string message)
-            : base(message)
-        {
-        }
-
-        public MissingTransitionException(string message, Exception inner)
-            : base(message, inner)
-        {
-        }
-    }
 }

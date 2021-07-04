@@ -74,18 +74,20 @@ namespace MarkovChain
             }
         }
 
-        public ChainState<T> PickNextState(Random rng)
+        public bool TryTransition(Random rng, out ChainState<T> state)
         {
             if (this.weightedTransitions.Count == 0)
             {
-                throw new MissingTransitionException("state contains no transitions to choose from");
+                state = null;
+                return false;
             }
             int weightSum = this.weightedTransitions.Values.Sum();
             int sample = rng.Next(weightSum + 1);
             foreach (KeyValuePair<ChainState<T>, int> transition in this.weightedTransitions)
             {
                 if (sample <= transition.Value) {
-                    return transition.Key;
+                    state = transition.Key;
+                    return true;
                 }
                 sample -= transition.Value;
             }
