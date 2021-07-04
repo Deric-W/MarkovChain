@@ -50,6 +50,11 @@ namespace MarkovChain
             this.weightedTransitions[stateTo] = currentWeight + weight;
         }
 
+        public IEnumerator<KeyValuePair<ChainState<T>, int>> EnumerateTransitions()
+        {
+            return this.weightedTransitions.GetEnumerator();
+        }
+
         public bool RemoveTransition(ChainState<T> stateTo)
         {
             return this.weightedTransitions.Remove(stateTo);
