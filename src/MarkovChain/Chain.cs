@@ -1,10 +1,21 @@
+using System.Collections;
 using System.Collections.Generic;
 
 namespace MarkovChain
 {
-    public class Chain<T>
+    public class Chain<T>: ICollection<T>
     {
         protected Dictionary<T, ChainState<T>> states;
+
+        public int Count
+        {
+            get { return this.states.Count; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return ((ICollection<KeyValuePair<T, ChainState<T>>>)this.states).IsReadOnly; }
+        }
 
         public Chain()
         {
@@ -24,6 +35,46 @@ namespace MarkovChain
         public bool TryAddState(T value, ChainState<T> state)
         {
             return this.states.TryAdd(value, state);
+        }
+
+        public void Add(T value)
+        {
+            this.TryAddState(value);
+        }
+
+        public bool Remove(T value)
+        {
+            return this.states.Remove(value);
+        }
+
+        public void Clear()
+        {
+            this.states.Clear();
+        }
+
+        public bool Contains(T value)
+        {
+            return this.states.ContainsKey(value);
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return this.states.Keys.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            this.states.Keys.CopyTo(array, arrayIndex);
+        }
+
+        public IEnumerator<ChainState<T>> EnumerateStates()
+        {
+            return this.states.Values.GetEnumerator();
         }
 
         public bool TryGetState(T value, out ChainState<T> state)

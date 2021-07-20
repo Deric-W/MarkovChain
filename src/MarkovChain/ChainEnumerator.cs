@@ -6,13 +6,15 @@ namespace MarkovChain
 {
     public class ChainEnumerator<T>: IEnumerator<T>
     {
-        protected ChainState<T> currentState;
+        protected ChainState<T> nextState;
+
+        protected T currentValue;
 
         protected Random rng;
 
         public T Current
         {
-            get { return this.currentState.value; }
+            get { return this.currentValue; }
         }
 
         object IEnumerator.Current
@@ -20,33 +22,37 @@ namespace MarkovChain
             get { return (object)this.Current; }
         }
 
-        public ChainEnumerator(ChainState<T> currentState)
+        public ChainEnumerator(ChainState<T> nextState)
         {
-            this.currentState = currentState;
+            this.nextState = nextState;
             this.rng = new Random();
         }
 
-        public ChainEnumerator(ChainState<T> currentState, Random rng)
+        public ChainEnumerator(ChainState<T> nextState, Random rng)
         {
-            this.currentState = currentState;
+            this.nextState = nextState;
             this.rng = rng;
         }
 
         public bool MoveNext()
         {
-            try
-            {
-                this.currentState = this.currentState.PickNextState(this.rng);
-            }
-            catch (MissingTransitionException)
+            if (this.nextState == null)
             {
                 return false;
             }
-            catch (InvalidSampleException e)
+            else
             {
-                throw new InvalidOperationException("state was modified", e);
+                this.currentValue = this.nextState.value;
+                try
+                {
+                    this.nextState.TryTransition(rng, out this.nextState);
+                }
+                catch (InvalidSampleException e)
+                {
+                    throw new InvalidOperationException("state was modified", e);
+                }
+                return true;
             }
-            return true;
         }
 
         public void Reset()
