@@ -5,7 +5,7 @@ namespace MarkovChain.Cli
 {
     public class LineJoiningEnumerator : IEnumerator<char>
     {
-        protected PeekableEnumeratorAdapter<char> enumerator;
+        protected IPeekableEnumerator<char> enumerator;
 
         public char Current
         {
@@ -15,6 +15,11 @@ namespace MarkovChain.Cli
         object IEnumerator.Current
         {
             get { return (object)this.Current; }
+        }
+
+        public LineJoiningEnumerator(IPeekableEnumerator<char> enumerator)
+        {
+            this.enumerator = enumerator;
         }
 
         public LineJoiningEnumerator(IEnumerator<char> enumerator)

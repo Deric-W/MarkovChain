@@ -3,7 +3,13 @@ using System.Collections.Generic;
 
 namespace MarkovChain.Cli
 {
-    public class PeekableEnumeratorAdapter<T> : IEnumerator<T>
+
+    public interface IPeekableEnumerator<T> : IEnumerator<T>
+    {
+        public bool TryPeek(out T nextValue);
+    }
+
+    public class PeekableEnumeratorAdapter<T> : IPeekableEnumerator<T>
     {
         protected IEnumerator<T> enumerator;
 
