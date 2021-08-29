@@ -49,6 +49,7 @@ namespace MarkovChain.Cli
         public void Reset()
         {
             this.enumerator.Reset();
+            this.fetchedNext = this.enumerator.MoveNext();
         }
 
         public void Dispose()

@@ -31,10 +31,21 @@ namespace MarkovChain.Tests
         [Test]
         public void Reset()
         {
-            var enumeratorMock = new Mock<IEnumerator<int>>();
-            enumeratorMock.Setup(e => e.Reset());
-            new Cli.PeekableEnumeratorAdapter<int>(enumeratorMock.Object).Reset();
-            enumeratorMock.Verify(e => e.Reset(), Times.Once());
+            int peeked;
+            var enumerator = new Cli.PeekableEnumeratorAdapter<int>(
+                new int[]{1, 2}.Cast<int>().GetEnumerator()
+            );
+            enumerator.MoveNext();
+            enumerator.MoveNext();
+            Assert.AreEqual(2, enumerator.Current);
+            Assert.IsFalse(enumerator.TryPeek(out peeked));
+            enumerator.Reset();
+            Assert.IsTrue(enumerator.TryPeek(out peeked));
+            Assert.AreEqual(peeked, 1);
+            Assert.IsTrue(enumerator.MoveNext());
+            Assert.AreEqual(1, enumerator.Current);
+            Assert.IsTrue(enumerator.TryPeek(out peeked));
+            Assert.AreEqual(peeked, 2);
         }
 
         [Test]
