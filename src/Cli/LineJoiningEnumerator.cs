@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -57,7 +59,7 @@ namespace MarkovChain.Cli
 
         public bool IsEndOfLine(char c)
         {
-            return c == '\n' || c == '\r';
+            return c == '\n' || c == '\r' || Char.GetUnicodeCategory(c) == UnicodeCategory.LineSeparator;
         }
 
         public void Reset()

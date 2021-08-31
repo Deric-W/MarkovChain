@@ -12,7 +12,7 @@ namespace MarkovChain.Tests
         [Test]
         public void MoveNext()
         {
-            string text = "This is a Test.\n\rWe test multiple line end-\rings and multiple lin-\n\n\r\n\n\res.\n";
+            string text = "This is a Test.\n\rWe test multiple line end-\rings and multiple lin-\n\n\r\n\n\r\x2028es.\n";
             Cli.LineJoiningEnumerator enumerator = new Cli.LineJoiningEnumerator(text.GetEnumerator());
             StringBuilder builder = new StringBuilder(67);
             while (enumerator.MoveNext())
@@ -28,6 +28,7 @@ namespace MarkovChain.Tests
             Cli.LineJoiningEnumerator enumerator = new Cli.LineJoiningEnumerator(new char[]{}.Cast<char>().GetEnumerator());
             Assert.IsTrue(enumerator.IsEndOfLine('\n'));
             Assert.IsTrue(enumerator.IsEndOfLine('\r'));
+            Assert.IsTrue(enumerator.IsEndOfLine('\x2028'));
             Assert.IsFalse(enumerator.IsEndOfLine('X'));
             Assert.IsFalse(enumerator.IsEndOfLine(' '));
         }
