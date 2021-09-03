@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Authors>Eric Wolf;Armin Wolf</Authors>
+    <Description>Simple markov chain implementation</Description>
+    <PackageProjectUrl>https://github.com/Deric-W/MarkovChain</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Deric-W/MarkovChain.git</RepositoryUrl>
+    <Copyright>Copyright (c) 2021 Eric Wolf</Copyright>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
   </PropertyGroup>
 
 </Project>
