@@ -39,7 +39,12 @@ namespace MarkovChain
 
         public void Add(T value)
         {
-            this.TryAddState(value);
+            this.states.Add(value, new ChainState<T>(value));
+        }
+
+        public void Add(T value, ChainState<T> state)
+        {
+            this.states.Add(value, state);
         }
 
         public bool Remove(T value)
@@ -90,16 +95,56 @@ namespace MarkovChain
         public void AddTransition(T valueFrom, T valueTo, int weight)
         {
             ChainState<T> stateTo;
+            ChainState<T> stateFrom;
             if (!this.states.TryGetValue(valueTo, out stateTo))
             {
                 this.states[valueTo] = stateTo = new ChainState<T>(valueTo);
             }
-            ChainState<T> stateFrom;
             if (!this.states.TryGetValue(valueFrom, out stateFrom))
             {
                 this.states[valueFrom] = stateFrom = new ChainState<T>(valueFrom);
             }
             stateFrom.AddTransition(stateTo, weight);
+        }
+
+        public void AddTransitions(IEnumerator<(T, int)> transitions)
+        {
+            ChainState<T> newState;
+            ChainState<T> lastState;    // reuse last state 
+            T value;
+            int weight;
+           if (transitions.MoveNext())
+           {
+                (value, _) = transitions.Current;   // first weight is ignored
+                if (!this.TryGetState(value, out lastState))
+                {
+                    this.states[value] = lastState = new ChainState<T>(value);
+                }
+
+                while (transitions.MoveNext())
+                {
+                    (value, weight) = transitions.Current;
+                    if (!this.TryGetState(value, out newState))
+                    {
+                        this.states[value] = newState = new ChainState<T>(value);
+                    }
+                    lastState.AddTransition(newState, weight);
+                    lastState = newState;
+                }
+           }
+        }
+
+        public void AddTransitions(IEnumerator<T> transitions)
+        {
+            this.AddTransitions(this.AddWeights(transitions));
+        }
+
+        private IEnumerator<(T, int)> AddWeights(IEnumerator<T> transitions)
+        {
+            while (transitions.MoveNext())
+            {
+                yield return (transitions.Current, 1);
+            }
         }
     }
 }

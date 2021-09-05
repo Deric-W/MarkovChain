@@ -23,6 +23,11 @@ namespace MarkovChain
             this.weightedTransitions = weightedTransitions;
         }
 
+        public int Transitions
+        {
+            get { return this.weightedTransitions.Count; }
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
             return new ChainEnumerator<T>(this);
@@ -53,6 +58,16 @@ namespace MarkovChain
         public IEnumerator<KeyValuePair<ChainState<T>, int>> EnumerateTransitions()
         {
             return this.weightedTransitions.GetEnumerator();
+        }
+
+        public bool HasTransition(ChainState<T> nextState)
+        {
+            return this.weightedTransitions.Keys.Contains(nextState);
+        }
+
+        public bool TryGetWeight(ChainState<T> nextState, out int weight)
+        {
+            return this.weightedTransitions.TryGetValue(nextState, out weight);
         }
 
         public bool RemoveTransition(ChainState<T> stateTo)
