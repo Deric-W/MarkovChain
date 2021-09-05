@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Collections.Generic;
 using CommandLine;
 
@@ -78,7 +77,7 @@ namespace MarkovChain.Cli
 
                 for (int i = 0; i < options.SentenceCount; i++)
                 {
-                    using (tokens = initialState.GetEnumerator(rng))
+                    using (tokens = initialState.StartTransitions(rng))
                     {
                         tokens.MoveNext();  // skip inital Token
                         while (tokens.MoveNext())

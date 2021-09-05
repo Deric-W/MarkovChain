@@ -7,12 +7,12 @@ namespace MarkovChain.Tests
     [TestFixture]
     public class ChainState
     {
-        protected static ChainState<int>[] states = {
+        private static ChainState<int>[] states = {
             new ChainState<int>(0),
             new ChainState<int>(1)
         };
 
-        public bool EnumeratorContains<T>(IEnumerator<T> enumerator, HashSet<T> values)
+        private bool EnumeratorContains<T>(IEnumerator<T> enumerator, ICollection<T> values)
         {
             int items = 0;
             while (enumerator.MoveNext())
@@ -41,16 +41,16 @@ namespace MarkovChain.Tests
 
             state.AddTransition(states[0]);
             stateSet.Add(new KeyValuePair<ChainState<int>, int>(states[0], 1));
-            Assert.True(this.EnumeratorContains(state.EnumerateTransitions(), stateSet));
+            Assert.True(this.EnumeratorContains(state.GetEnumerator(), stateSet));
 
             state.AddTransition(states[1], 42);
             stateSet.Add(new KeyValuePair<ChainState<int>, int>(states[1], 42));
-            Assert.True(this.EnumeratorContains(state.EnumerateTransitions(), stateSet));
+            Assert.True(this.EnumeratorContains(state.GetEnumerator(), stateSet));
 
             state.AddTransition(states[0], 9);
             stateSet.Remove(new KeyValuePair<ChainState<int>, int>(states[0], 1));
             stateSet.Add(new KeyValuePair<ChainState<int>, int>(states[0], 10));
-            Assert.True(this.EnumeratorContains(state.EnumerateTransitions(), stateSet));
+            Assert.True(this.EnumeratorContains(state.GetEnumerator(), stateSet));
         }
 
         [Test]
@@ -70,11 +70,11 @@ namespace MarkovChain.Tests
             Assert.True(state.RemoveTransition(states[1], 40));
             stateSet.Remove(new KeyValuePair<ChainState<int>, int>(states[1], 42));
             stateSet.Add(new KeyValuePair<ChainState<int>, int>(states[1], 2));
-            Assert.True(this.EnumeratorContains(state.EnumerateTransitions(), stateSet));
+            Assert.True(this.EnumeratorContains(state.GetEnumerator(), stateSet));
 
             Assert.True(state.RemoveTransition(states[0]));
             stateSet.Remove(new KeyValuePair<ChainState<int>, int>(states[0], 1));
-            Assert.True(this.EnumeratorContains(state.EnumerateTransitions(), stateSet));
+            Assert.True(this.EnumeratorContains(state.GetEnumerator(), stateSet));
 
             Assert.False(state.RemoveTransition(states[0]));
         }

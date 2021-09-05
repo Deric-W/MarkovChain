@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace MarkovChain
 {
-    public class ChainState<T>: IEnumerable<T>
+    public class ChainState<T>: IEnumerable<KeyValuePair<ChainState<T>, int>>
     {
         public T value;
 
@@ -28,19 +28,24 @@ namespace MarkovChain
             get { return this.weightedTransitions.Count; }
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<T> StartTransitions()
         {
             return new ChainEnumerator<T>(this);
+        }
+
+        public IEnumerator<T> StartTransitions(Random rng)
+        {
+            return new ChainEnumerator<T>(this, rng);
+        }
+
+        public IEnumerator<KeyValuePair<ChainState<T>, int>> GetEnumerator()
+        {
+            return this.weightedTransitions.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new ChainEnumerator<T>(this);
-        }
-
-        public IEnumerator<T> GetEnumerator(Random rng)
-        {
-            return new ChainEnumerator<T>(this, rng);
+            return this.GetEnumerator();
         }
 
         public void AddTransition(ChainState<T> stateTo)
@@ -53,11 +58,6 @@ namespace MarkovChain
             int currentWeight = 0;
             this.weightedTransitions.TryGetValue(stateTo, out currentWeight);
             this.weightedTransitions[stateTo] = currentWeight + weight;
-        }
-
-        public IEnumerator<KeyValuePair<ChainState<T>, int>> EnumerateTransitions()
-        {
-            return this.weightedTransitions.GetEnumerator();
         }
 
         public bool HasTransition(ChainState<T> nextState)
