@@ -49,7 +49,7 @@ namespace MarkovChain.Tests
             Chain<int> chain = new Chain<int>();
             chain.Add(0);
             Assert.IsTrue(chain.Contains(0));
-            chain.Add(0);
+            Assert.Throws<ArgumentException>(() => chain.Add(0));
             Assert.AreEqual(chain.Count, 1);
         }
 
@@ -91,7 +91,9 @@ namespace MarkovChain.Tests
             Assert.IsTrue(chain.TryAddState(42));
             int[] array = new int[]{1, 2, 3};
             chain.CopyTo(array, 1);
-            Assert.IsTrue(array.SequenceEqual(new int[]{1, 0, 42}) || array.SequenceEqual(new int[]{1, 42, 0}));
+            Assert.IsTrue(
+                array.SequenceEqual(new int[]{1, 0, 42}) || array.SequenceEqual(new int[]{1, 42, 0})
+            );
         }
 
         [Test]
@@ -106,10 +108,41 @@ namespace MarkovChain.Tests
             chain.AddTransition(1, 2, 42);
             Assert.IsTrue(chain.TryGetState(1, out state2));
             Assert.AreSame(state1, state2);
-            IEnumerator<KeyValuePair<ChainState<int>, int>> enumerator = state1.EnumerateTransitions();
-            Assert.IsTrue(enumerator.MoveNext());
-            Assert.AreEqual(enumerator.Current.Value, 42);
-            Assert.IsFalse(enumerator.MoveNext());
+            Assert.IsTrue(chain.TryGetState(2, out state2));
+            Assert.IsTrue(state1.TryGetWeight(state2, out int weight));
+            Assert.AreEqual(42, weight);
+            Assert.AreEqual(1, state1.Transitions);
+            Assert.AreEqual(0, state2.Transitions);
+        }
+
+        [Test]
+        public void AddTransitions()
+        {
+            ChainState<int> state1;
+            ChainState<int> state2;
+            int weight;
+            Chain<int> chain = new Chain<int>();
+            chain.AddTransitions(
+                new (int, int)[]{}.Cast<(int, int)>().GetEnumerator()
+            );
+            Assert.AreEqual(0, chain.Count);
+            chain.AddTransition(2, 42);
+            chain.AddTransitions(
+                new (int, int)[]{ (3, 42), (2, 1), (1, 9) }.Cast<(int, int)>().GetEnumerator()
+            );
+            Assert.AreEqual(chain.Count, 4);
+            Assert.IsTrue(chain.TryGetState(3, out state1));
+            Assert.IsTrue(chain.TryGetState(2, out state2));
+            Assert.IsTrue(state1.TryGetWeight(state2, out weight));
+            Assert.AreEqual(1, weight);
+            state1 = state2;
+            Assert.IsTrue(chain.TryGetState(42, out state2));
+            Assert.IsTrue(state1.TryGetWeight(state2, out weight));
+            Assert.AreEqual(1, weight);
+            Assert.IsTrue(chain.TryGetState(1, out state2));
+            Assert.IsTrue(state1.TryGetWeight(state2, out weight));
+            Assert.AreEqual(9, weight);
+            Assert.AreEqual(0, state2.Transitions);
         }
     }
 }

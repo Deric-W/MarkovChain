@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace MarkovChain
 {
-    public class ChainState<T>: IEnumerable<T>
+    public class ChainState<T>: IEnumerable<KeyValuePair<ChainState<T>, int>>
     {
         public T value;
 
@@ -23,19 +23,29 @@ namespace MarkovChain
             this.weightedTransitions = weightedTransitions;
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public int Transitions
+        {
+            get { return this.weightedTransitions.Count; }
+        }
+
+        public IEnumerator<T> StartTransitions()
         {
             return new ChainEnumerator<T>(this);
+        }
+
+        public IEnumerator<T> StartTransitions(Random rng)
+        {
+            return new ChainEnumerator<T>(this, rng);
+        }
+
+        public IEnumerator<KeyValuePair<ChainState<T>, int>> GetEnumerator()
+        {
+            return this.weightedTransitions.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new ChainEnumerator<T>(this);
-        }
-
-        public IEnumerator<T> GetEnumerator(Random rng)
-        {
-            return new ChainEnumerator<T>(this, rng);
+            return this.GetEnumerator();
         }
 
         public void AddTransition(ChainState<T> stateTo)
@@ -50,9 +60,14 @@ namespace MarkovChain
             this.weightedTransitions[stateTo] = currentWeight + weight;
         }
 
-        public IEnumerator<KeyValuePair<ChainState<T>, int>> EnumerateTransitions()
+        public bool HasTransition(ChainState<T> nextState)
         {
-            return this.weightedTransitions.GetEnumerator();
+            return this.weightedTransitions.Keys.Contains(nextState);
+        }
+
+        public bool TryGetWeight(ChainState<T> nextState, out int weight)
+        {
+            return this.weightedTransitions.TryGetValue(nextState, out weight);
         }
 
         public bool RemoveTransition(ChainState<T> stateTo)
