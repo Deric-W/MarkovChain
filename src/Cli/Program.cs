@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using CommandLine;
 
@@ -12,8 +13,8 @@ namespace MarkovChain.Cli
             [Option('n', "sentences", Default = 1, HelpText = "How many sentences should be produced, n < 1 for unlimited.")]
             public int SentenceCount { get; set; }
 
-            [Option('s', "start", Default = ".", HelpText = "Token which indicates the start of a new sentence.")]
-            public string StartingToken { get; set; }
+            [Option('s', "start", Default = new string[]{ ".", "?", "!", "‽" }, HelpText = "Tokens which indicate the start of a new sentence.")]
+            public IEnumerable<string> StartingTokens { get; set; }
 
             [Option('v', "verbose", Default = false, HelpText = "Show tokens while parsing.")]
             public bool Verbose { get; set; }
@@ -49,8 +50,19 @@ namespace MarkovChain.Cli
                             chain.AddTransitions(tokens);
                         }
                     }
-
-                    Program.WriteSentences(chain, options);
+                    List<ChainState<string>> initialStates = new List<ChainState<string>>();
+                    HashSet<string> initialTokens = new HashSet<string>();
+                    foreach (string token in options.StartingTokens)
+                    {
+                        if (chain.TryGetState(token, out ChainState<string> state) && initialTokens.Add(token))
+                        {
+                            initialStates.Add(state);
+                        }
+                    }
+                    foreach (string sentence in Program.GenerateSentences(initialTokens, initialStates).Take(options.SentenceCount))
+                    {
+                        Console.WriteLine(sentence);
+                    }
                 }
             );
         }
@@ -67,32 +79,34 @@ namespace MarkovChain.Cli
             Console.WriteLine("}");
         }
 
-        static void WriteSentences(Chain<string> chain, Options options)
+        static IEnumerable<string> GenerateSentences(ICollection<string> initialTokens, IList<ChainState<string>> initialStates)
         {
             Random rng = new Random();
             List<string> buffer = new List<string>();
-            IEnumerator<string> tokens;
-            if (chain.TryGetState(options.StartingToken, out ChainState<string> initialState))
-            {
 
-                for (int i = 0; i < options.SentenceCount; i++)
+            if (initialStates.Count != 0)
+            {
+                while (true)
                 {
-                    using (tokens = initialState.StartTransitions(rng))
+                    using (IEnumerator<string> tokens = initialStates[rng.Next(initialStates.Count)].StartTransitions(rng))
                     {
                         tokens.MoveNext();  // skip inital Token
                         while (tokens.MoveNext())
                         {
                             buffer.Add(tokens.Current);
-                            if (tokens.Current.Equals(options.StartingToken))
+                            if (initialTokens.Contains(tokens.Current))
                             {
                                 break;
                             }
                         }
-
-                        Console.WriteLine(String.Join(' ', buffer));
-                        buffer.Clear();
                     }
+                    yield return String.Join(' ', buffer);
+                    buffer.Clear();
                 }
+            }
+            else
+            {
+                throw new ArgumentException($"no starting Token ({String.Join(", ", initialTokens)}) does exist in the chain");
             }
         }
     }
