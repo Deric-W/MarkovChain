@@ -27,29 +27,20 @@ namespace MarkovChain.Cli
         {
             Parser.Default.ParseArguments<Options>(args).WithParsed<Options>(options =>
                 {
-                    IEnumerator<char> enumerator;
-                    IEnumerator<string> tokens;
                     Chain<string> chain = new Chain<string>();
 
-                    foreach (string path in options.SampleFiles)
+                    using(IEnumerator<string> tokens = Program.ParseFiles(options.SampleFiles.GetEnumerator()).GetEnumerator())
                     {
-                        if (path.Equals("-"))
-                        {
-                            enumerator = new StreamReader(Console.OpenStandardInput()).ReadToEnd().GetEnumerator();
-                        }
-                        else
-                        {
-                            enumerator = File.ReadAllText(path).GetEnumerator();
-                        }
-                        using(tokens = new Tokenizer(new LineJoiningEnumerator(enumerator)))
-                        {
                             if (options.Verbose)
                             {
-                                tokens = Program.WriteTokens(tokens);
+                                chain.AddTransitions(Program.WriteTokens(tokens));
                             }
-                            chain.AddTransitions(tokens);
-                        }
+                            else
+                            {
+                                chain.AddTransitions(tokens);
+                            }
                     }
+
                     List<ChainState<string>> initialStates = new List<ChainState<string>>();
                     HashSet<string> initialTokens = new HashSet<string>();
                     foreach (string token in options.StartingTokens)
@@ -65,6 +56,30 @@ namespace MarkovChain.Cli
                     }
                 }
             );
+        }
+
+        static IEnumerable<string> ParseFiles(IEnumerator<string> paths)
+        {
+            IEnumerator<char> stream;
+            IEnumerator<string> tokens;
+            while (paths.MoveNext())
+            {
+                if (paths.Current.Equals("-"))
+                {
+                    stream = new StreamReader(Console.OpenStandardInput()).ReadToEnd().GetEnumerator();
+                }
+                else
+                {
+                    stream = File.ReadAllText(paths.Current).GetEnumerator();
+                }
+                using(tokens = new Tokenizer(new LineJoiningEnumerator(stream)))
+                {
+                    while (tokens.MoveNext())
+                    {
+                        yield return tokens.Current;
+                    }
+                }
+            }
         }
 
         static IEnumerator<string> WriteTokens(IEnumerator<string> enumerator)
