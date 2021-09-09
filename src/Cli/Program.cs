@@ -6,7 +6,7 @@ using CommandLine;
 
 namespace MarkovChain.Cli
 {
-    class Program
+    public class Program
     {
         public class Options
         {
@@ -23,7 +23,7 @@ namespace MarkovChain.Cli
             public IEnumerable<string> SampleFiles { get; set; }
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Parser.Default.ParseArguments<Options>(args).WithParsed<Options>(options =>
                 {
@@ -58,7 +58,7 @@ namespace MarkovChain.Cli
             );
         }
 
-        static IEnumerable<string> ParseFiles(IEnumerator<string> paths)
+        public static IEnumerable<string> ParseFiles(IEnumerator<string> paths)
         {
             IEnumerator<char> stream;
             IEnumerator<string> tokens;
@@ -94,7 +94,7 @@ namespace MarkovChain.Cli
             Console.WriteLine("}");
         }
 
-        static IEnumerable<string> GenerateSentences(ICollection<string> initialTokens, IList<ChainState<string>> initialStates)
+        public static IEnumerable<string> GenerateSentences(ICollection<string> initialTokens, IList<ChainState<string>> initialStates)
         {
             Random rng = new Random();
             List<string> buffer = new List<string>();

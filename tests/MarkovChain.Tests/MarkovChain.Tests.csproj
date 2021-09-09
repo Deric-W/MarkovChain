@@ -19,4 +19,8 @@
     <ProjectReference Include="..\..\src\Cli\Cli.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="SampleFiles/*.*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

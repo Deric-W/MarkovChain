@@ -1,4 +1,4 @@
-name: dotnet package
+name: Tests
 
 on: [push, workflow_dispatch]
 
