@@ -6,8 +6,11 @@ using CommandLine;
 
 namespace MarkovChain.Cli
 {
-    public class Program
+    /// <summary>Class implementing the Cli app</summary>
+    public static class Program
     {
+        /// <summary>Class representing parsed Cli options.</summary>
+        /// <remarks><see href="https://github.com/commandlineparser/commandline">CommandLine</see> is used for parsing.</remarks>
         public class Options
         {
             [Option('n', "sentences", Default = 1, HelpText = "How many sentences should be produced, n < 1 for unlimited.")]
@@ -23,6 +26,8 @@ namespace MarkovChain.Cli
             public IEnumerable<string> SampleFiles { get; set; }
         }
 
+        /// <summary>Entry point of the Cli app</summary>
+        /// <param name="args">Cli arguments</params>
         public static void Main(string[] args)
         {
             Parser.Default.ParseArguments<Options>(args).WithParsed<Options>(options =>
@@ -58,6 +63,10 @@ namespace MarkovChain.Cli
             );
         }
 
+        /// <summary>Generator which parses the files passed to <see cref="Program.Main(string[])"/>.</summary>
+        /// <remarks>The file path "-" is translated into stdin.</remarks>
+        /// <param name="paths">File paths to be parsed into tokens</param>
+        /// <returns>An <see cref="IEnumerable{string}"/> yielding the resulting tokens</returns>
         public static IEnumerable<string> ParseFiles(IEnumerator<string> paths)
         {
             IEnumerator<char> stream;
@@ -82,6 +91,9 @@ namespace MarkovChain.Cli
             }
         }
 
+        /// <summary>Generator which wraps an <see cref="IEnumerator{string}"/> and prints each token to <see cref="Console"/></summary>
+        /// <param name="enumerator"><see cref="IEnumerator{string}"/> to wrap</param>
+        /// <returns>An <see cref="IEnumerator{string}"/> wrapping <paramref name="enumerator"/></returns>
         static IEnumerator<string> WriteTokens(IEnumerator<string> enumerator)
         {
             Console.WriteLine("Tokens {");
@@ -94,6 +106,11 @@ namespace MarkovChain.Cli
             Console.WriteLine("}");
         }
 
+        /// <summary>Generate sentences from a <see cref="Chain{string}"/>.</summary>
+        /// <remarks>The quality of the sentences depends on the samples provided and the rng.</remarks>
+        /// <param name="initialTokens">Tokens which mark the start of a new sentence</param>
+        /// <param name="initialStates">States of the tokens in <paramref name="initialTokens"/></param>
+        /// <returns>An <see cref="IEnumerable{string}"/> which yields an unlimited amount of sentences</returns>
         public static IEnumerable<string> GenerateSentences(ICollection<string> initialTokens, IList<ChainState<string>> initialStates)
         {
             Random rng = new Random();
